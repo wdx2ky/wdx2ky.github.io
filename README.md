@@ -1,18 +1,2 @@
 # wdx2ky.github.io
-<!DOCTYPE html>
-<html lang="en" style="height: 100%;">
-<head>
-   <meta charset="UTF-8" />
-	 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	 <meta name="format-detection" content="telephone=no" />
-   <title>全班劳动党官网</title>
-	 <p class="tit" style="margin: 50px 50 0 10px;font-size:50px;color: #000;">全班劳动党官网</p>
-	 <p class="tit" style="margin: 70px 50 0 10px;font-size:20px;color: #000;">温馨提示：纯属娱乐</p>
-	 <p class="tit" style="margin: 70px 50 0 10px;font-size:20px;color: #000;">全班劳动党总部位于中国长沙市望城区</p>
-	 <p class="tit" style="margin: 70px 50 0 10px;font-size:15px;color: #000;">主席：祁暄竣</p>
-	 <p class="tit" style="margin: 70px 50 0 10px;font-size:15px;color: #000;">副主席：吴东旭（网站创建者@带师）</p>
-	 <p class="tit" style="margin: 70px 50 0 10px;font-size:15px;color: #000;">一大堆部长不想写了</p>
-   <p class="tit" style="margin: 70px 50 0 10px;font-size:30px;color: #000;">党章</p>
-   <p class="tit" style="margin: 70px 50 0 10px;font-size:15px;color: #000;">目前没有</p>
-</html>
+
