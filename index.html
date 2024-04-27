@@ -7,19 +7,22 @@
 	 <meta name="format-detection" content="telephone=no" />
 	 <p class="tit" style="margin: 50px 10 0 10px;font-size:50px;color: #000;">全班劳动党官网</p>
 	 <p class="tit" style="margin: 70px 10 0 10px;font-size:20px;color: #000;">温馨提示：纯属娱乐</p>
-	 var i=0;
-	function myDate(){
-	var now=new Date();
-	var year=now.getFullYear();
-	var month=now.getMonth()+1;
-	var day=now.getDate();
-	var hours=now.getHours();
-	var minutes=now.getMinutes();
-	var seconds=now.getSeconds();
-		 
-	document.getElementById("div").innerHTML=year+"年"+month+"月"+day+"日"+hours+"："+minutes+"："+seconds;
-	}
-	setInterval(myDate,1000);
+	 <script>
+		function showTime(clock){
+		    var now = new Date();
+		    var year = now.getFullYear();
+		    var month= now.getMonth();
+		    var day = now.getDate();
+		    var hour = now.getHours();
+		    var minu = now.getMinutes();
+		    var second = now.getSeconds();
+		    month = month+1;
+		    var arr_work = new Array("星期日","星期一","星期二","星期三","星期四","星期五","星期六");
+		    var week = arr_work[ now.getDay()];
+		    var time = year+"年"+month+"月"+day+"日 "+ week+" "+hour+":"+minu+":"+second;
+		    clock.innerHTML="当前时间: "+time;
+		}
+	</script>
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:25px;color: #000;">党旗</p>
 	<a class="a sm-app"><img src="qizhi.jpg">
 	</a>
