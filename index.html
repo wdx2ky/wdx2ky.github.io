@@ -1,23 +1,6 @@
 <html lang="en" style="height: 100%;">
 <title>全班劳动党官网</title>
 <head>
-	<script>
-    var i=0;
-    function myDate(){
-        var now=new Date();
-        var year=now.getFullYear();
-        var month=now.getMonth()+1;
-        var day=now.getDate();
-        var hours=now.getHours();
-        var minutes=now.getMinutes();
-        var seconds=now.getSeconds();
- 
-        document.getElementById("div").innerHTML=year+"年"+month+"月"+day+"日"+hours+"："+minutes+"："+seconds;
-    }
-    setInterval(myDate,1000);
-</script>
-</head>
-<head>
    	 <meta charset="UTF-8" />
 	 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -58,5 +41,20 @@
                                 &emsp;&emsp;-写下文字</p> 
                                 &emsp;&emsp;-修改字体及颜色</p>
                                 &emsp;&emsp;-细节优化和修复</p>
+	<script>
+		var i=0;
+		function myDate(){
+		var now=new Date();
+		var year=now.getFullYear();
+		var month=now.getMonth()+1;
+		var day=now.getDate();
+		var hours=now.getHours();
+		var minutes=now.getMinutes();
+		var seconds=now.getSeconds();
+		 
+		document.getElementById("div").innerHTML=year+"年"+month+"月"+day+"日"+hours+"："+minutes+"："+seconds;
+		    }
+		setInterval(myDate,1000);
+	</script>
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:15px;color: #000;">[                       ]</p>
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:15px;color: #000;">[                       ]</p>
