@@ -7,7 +7,19 @@
 	 <meta name="format-detection" content="telephone=no" />
 	 <p class="tit" style="margin: 50px 10 0 10px;font-size:50px;color: #000;">全班劳动党官网</p>
 	 <p class="tit" style="margin: 70px 10 0 10px;font-size:20px;color: #000;">温馨提示：纯属娱乐</p>
-	
+	 var i=0;
+	function myDate(){
+	var now=new Date();
+	var year=now.getFullYear();
+	var month=now.getMonth()+1;
+	var day=now.getDate();
+	var hours=now.getHours();
+	var minutes=now.getMinutes();
+	var seconds=now.getSeconds();
+		 
+	document.getElementById("div").innerHTML=year+"年"+month+"月"+day+"日"+hours+"："+minutes+"："+seconds;
+	}
+	setInterval(myDate,1000);
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:25px;color: #000;">党旗</p>
 	<a class="a sm-app"><img src="qizhi.jpg">
 	</a>
@@ -23,7 +35,7 @@
 	<a href="rudang.html" target="top">入党界面</a>
  	<h1 class="tit"><span></span>更新记录</h1>
 		<div style="margin-left: 20px;">
-			<details><summary><span>v1.2.0</span> 第一次更新！</summary><p>
+			<details><summary><span>v1.3.0</span> 时间加入！</summary><p>
 				&emsp;&emsp;-时间加入</p>
 				&emsp;&emsp;-更改“入党”页面</p>
                                 &emsp;&emsp;-细节优化和修复</p>
@@ -41,20 +53,5 @@
                                 &emsp;&emsp;-写下文字</p> 
                                 &emsp;&emsp;-修改字体及颜色</p>
                                 &emsp;&emsp;-细节优化和修复</p>
-	<script>
-		var i=0;
-		function myDate(){
-		var now=new Date();
-		var year=now.getFullYear();
-		var month=now.getMonth()+1;
-		var day=now.getDate();
-		var hours=now.getHours();
-		var minutes=now.getMinutes();
-		var seconds=now.getSeconds();
-		 
-		document.getElementById("div").innerHTML=year+"年"+month+"月"+day+"日"+hours+"："+minutes+"："+seconds;
-		    }
-		setInterval(myDate,1000);
-	</script>
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:15px;color: #000;">[                       ]</p>
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:15px;color: #000;">[                       ]</p>
