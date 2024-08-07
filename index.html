@@ -7,8 +7,17 @@
 	 <meta name="format-detection" content="telephone=no" />
 	 <p class="tit" style="margin: 50px 10 0 10px;font-size:50px;color: #000;">全班劳动党官网<p class="detail" style='--cnt:"我们坚决拥护中国共产党的领导，绝没有分裂国家的想法和行为。\"全班劳动党\"并不是一个真实的团体，是一个虚构的不存在的组织。"'>i</a>
 	 <p class="tit" style="margin: 70px 10 0 10px;font-size:20px;color: #000;">温馨提示：纯属娱乐</p>
+	 <script>
+	     function  getD1(){
+	         var date=new Date();
+	         var d1=date.toLocaleString();
+	         document.getElementById("datetime").innerHTML =d1; 
+	     }
 	 
-	</script>
+	     setInterval("getD1();",1000);
+	 
+	</script> 
+
 	<p class="tit" style="margin: 70px 10 0 10px;font-size:25px;color: #000;">党旗</p>
 	<a class="a sm-app"><img src="qizhi.jpg">
 	</a>
@@ -22,10 +31,15 @@
 	<p class="tit" style="margin: 50px 0 0 10px;font-size:15px;color: #000;">我们感谢每一个支持我们的人</p>
 	<p class="tit" style="margin: 50px 0 0 10px;font-size:25px;color: #000;">入党</p>
 	<a href="rudang.html" target="top">入党界面</a>
-	<a href="gx.html" target="top">更新状态</a>
 	<p class="tit" style="margin: 50px 0 0 10px;font-size:25px;color: #000;">更新</p>
+	<a href="gx.html" target="top">更新状态</a>
  	<h1 class="tit"><span></span>更新记录</h1>
 		<div style="margin-left: 20px;">
+			<details><summary><span>v1.3.0</span> 优化与修复！</summary><p>
+				&emsp;&emsp;-修改时间</p>
+				&emsp;&emsp;-添加更新状态页面</p>
+                                &emsp;&emsp;-细节优化和修复</p>
+			</details>
 			<details><summary><span>v1.3.0</span> 时间加入！</summary><p>
 				&emsp;&emsp;-时间加入</p>
 				&emsp;&emsp;-更改“入党”页面</p>
