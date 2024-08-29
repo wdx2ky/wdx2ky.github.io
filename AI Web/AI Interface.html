@@ -2,6 +2,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDX AI</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 		<script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
 		<script type="text/javascript">
@@ -46,9 +47,10 @@
 						},
 					}
 				}
-			}
+  			}
 		</script>
 		<style type="text/tailwindcss">
+      
 			@layer base {
 				:root {
 					--background: 0 0% 100%;
@@ -105,7 +107,6 @@
   <div class="bg-card p-8 rounded-lg shadow-lg max-w-3xl w-full">
     <img src="img/beach.jpg" alt="海滩" class="w-full mb-4" />
     <p class="text-center text-lg mb-4">欢迎来到WDXAI</p>
-    <button class="bg-primary text-primary-foreground hover:bg-primary/80 px-4 py-2 rounded-md mb-4">开始</button>
     <div id="chat-container" class="overflow-y-auto max-h-60 mb-4"></div>
     <form id="chat-form" class="flex items-center">
       <input type="text" id="chat-input" class="flex-1 bg-input text-foreground px-4 py-2 rounded-l-md" placeholder="输入您的问题..." />
@@ -121,12 +122,10 @@
     e.preventDefault();
     const question = chatInput.value.trim();
     let answer;
-    // Display user's question
     const userBubble = document.createElement('div');
     userBubble.classList.add('bg-secondary', 'text-secondary-foreground', 'p-2', 'rounded-md', 'mb-2', 'max-w-xs', 'self-end');
     userBubble.textContent = question;
     chatContainer.appendChild(userBubble);
-    // Calculate answer
     if (question.includes('+')) {
       const [num1, num2] = question.split('+').map(num => parseInt(num));
       answer = num1 + num2;
@@ -141,17 +140,33 @@
       answer = num1 / num2;
     } else if (question.toLowerCase().includes('你是')) {
       answer = "我是WDXAI，由WDXAI Inc研发的AI";
+    } else if (question.toLowerCase().includes('吴东旭')) {
+      answer = "吴东旭是我的创造者。";
     } else {
       answer = "抱歉，我无法回答这个问题。";
     }
-    // Display answer
     const chatBubble = document.createElement('div');
     chatBubble.classList.add('bg-popover', 'text-popover-foreground', 'p-2', 'rounded-md', 'mb-2', 'max-w-xs');
     chatBubble.textContent = answer;
     chatContainer.appendChild(chatBubble);
-    // Clear input
     chatInput.value = '';
   });
 </script>
+     <style>
+      body{
+      background:linear-gradient( 
+        to right,
+        rgb(113,65,168),
+        rgba(44,114,251,1)
+      );
+		  }
+      .bg-primary {
+        background:linear-gradient( 
+        to right,
+        rgb(113,65,168),
+        rgba(44,114,251,1)
+      );
+      }
+    </style> 
   </body>
-</html>
+</html> 
