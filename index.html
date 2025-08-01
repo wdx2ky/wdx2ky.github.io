@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钢铁雄心4 - AI增强版（智能对手）</title>
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        /* 地图容器 */
+        .map-container {
+            flex: 2;
+            min-width: 300px;
+            height: 600px;
+            position: relative;
+            border: 2px solid #333;
+            overflow: hidden;
+            background-color: #e0e0e0;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1200px-World_map_-_low_resolution.svg.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px;
+        }
+        
+        /* 省份样式 */
+        .province {
+            position: absolute;
+            border: 1px solid rgba(0,0,0,0.3);
+            padding: 2px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.7;
+            text-align: center;
+            text-shadow: 1px 1px 1px black;
+            color: white;
+            border-radius: 3px;
+            box-sizing: border-box;
+            transform-origin: 0 0;
+        }
+        
+        .province:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 0 5px gold;
+        }
+        
+        .province.capital {
+            border: 2px solid gold;
+            font-weight: bold;
+        }
+        
+        .province.selected {
+            box-shadow: 0 0 10px #fff;
+            z-index: 20;
+        }
+        
+        /* 军队单位样式 */
+        .military-unit {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 30;
+            transition: all 0.3s;
+        }
+        
+        .military-unit:hover {
+            transform: scale(1.2);
+            z-index: 40;
+        }
+        
+        .military-unit.selected {
+            box-shadow: 0 0 10px #fff;
+            transform: scale(1.3);
+        }
+        
+        .military-unit.army {
+            background-color: #5cb85c;
+        }
+        
+        .military-unit.navy {
+            background-color: #428bca;
+        }
+        
+        .military-unit.air {
+            background-color: #f0ad4e;
+        }
+        
+        .military-unit.enemy {
+            background-color: #d9534f;
+        }
+        
+        /* 国家选择界面 */
+        .country-select-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .country-select-container {
+            background-color: white;
+            padding: 30px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+        
+        .country-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+        
+        .country-option:hover {
+            background-color: #f5f5f5;
+            transform: scale(1.02);
+        }
+        
+        .country-flag-large {
+            width: 60px;
+            height: 40px;
+            margin-right: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .start-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            font-size: 18px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .start-button:hover {
+            background-color: #1a252f;
+        }
+        
+        .start-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        /* 控制面板样式 */
+        .controls {
+            flex: 1;
+            min-width: 250px;
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            max-height: 600px;
+            overflow-y: auto;
+            border-radius: 5px;
+        }
+        
+        .resource-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .resource {
+            text-align: center;
+            min-width: 80px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        /* 外交面板样式 */
+        .diplomacy-panel {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+        
+        .diplomacy-option {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .diplomacy-option:hover {
+            background-color: #e9e9e9;
+        }
+        
+        /* 国家关系指示器 */
+        .relation-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .relation-hostile {
+            background-color: #d9534f;
+        }
+        
+        .relation-neutral {
+            background-color: #f0ad4e;
+        }
+        
+        .relation-friendly {
+            background-color: #5cb85c;
+        }
+        
+        .relation-ally {
+            background-color: #5bc0de;
+        }
+        
+        /* 选项卡样式 */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 时间控制按钮 */
+        .time-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .time-btn {
+            padding: 5px 10px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .time-btn:hover {
+            background-color: #1a252f;
+        }
+        
+        .time-btn.active {
+            background-color: #5bc0de;
+        }
+        
+        /* 军队移动指示器 */
+        .movement-line {
+            position: absolute;
+            height: 2px;
+            background-color: red;
+            z-index: 25;
+            transform-origin: 0 0;
+        }
+        
+        .enemy-movement-line {
+            position: absolute;
+            height: 2px;
+            background-color: #d9534f;
+            z-index: 25;
+            transform-origin: 0 0;
+        }
+        
+        /* 军队生产面板 */
+        .unit-production {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .production-option {
+            padding: 8px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .production-option:hover {
+            background-color: #e9e9e9;
+        }
+        
+        /* 战争日志 */
+        .war-log {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .log-entry.war {
+            color: #d9534f;
+        }
+        
+        .log-entry.diplomacy {
+            color: #5bc0de;
+        }
+    </style>
+</head>
+<body>
+    <!-- 国家选择界面 -->
+    <div id="country-select" class="country-select-overlay">
+        <div class="country-select-container">
+            <h1>选择你的国家</h1>
+            <p>选择一个国家开始游戏。每个国家有不同的起始条件和国家焦点。</p>
+            
+            <div id="country-options">
+                <div class="country-option" data-country="德国">
+                    <div class="country-flag-large" style="background-color:#5bc0de"></div>
+                    <div>
+                        <div class="country-name" style="font-weight:bold">德国</div>
+                        <div style="font-size:14px;color:#666">纳粹德国，由阿道夫·希特勒领导。拥有强大的军事工业但资源有限。</div>
+                        <div style="font-size:12px;margin-top:5px">起始资源: 人力1.5M | 工业50 | 政治点数100</div>
+                    </div>
+                </div>
+                
+                <div class="country-option" data-country="苏联">
+                    <div class="country-flag-large" style="background-color:#d9534f"></div>
+                    <div>
+                        <div class="country-name" style="font-weight:bold">苏联</div>
+                        <div style="font-size:14px;color:#666">斯大林领导的苏维埃社会主义共和国联盟。拥有庞大的人力资源但工业技术落后。</div>
+                        <div style="font-size:12px;margin-top:5px">起始资源: 人力5.0M | 工业40 | 政治点数80</div>
+                    </div>
+                </div>
+                
+                <div class="country-option" data-country="美国">
+                    <div class="country-flag-large" style="background-color:#428bca"></div>
+                    <div>
+                        <div class="country-name" style="font-weight:bold">美国</div>
+                        <div style="font-size:14px;color:#666">美利坚合众国，由富兰克林·罗斯福领导。拥有强大的工业潜力但孤立主义盛行。</div>
+                        <div style="font-size:12px;margin-top:5px">起始资源: 人力2.0M | 工业80 | 政治点数150</div>
+                    </div>
+                </div>
+                
+                <div class="country-option" data-country="英国">
+                    <div class="country-flag-large" style="background-color:#5cb85c"></div>
+                    <div>
+                        <div class="country-name" style="font-weight:bold">英国</div>
+                        <div style="font-size:14px;color:#666">大不列颠及北爱尔兰联合王国，拥有强大的海军但陆军相对薄弱。</div>
+                        <div style="font-size:12px;margin-top:5px">起始资源: 人力1.2M | 工业60 | 政治点数120</div>
+                    </div>
+                </div>
+                
+                <div class="country-option" data-country="法国">
+                    <div class="country-flag-large" style="background-color:#f0ad4e"></div>
+                    <div>
+                        <div class="country-name" style="font-weight:bold">法国</div>
+                        <div style="font-size:14px;color:#666">法兰西第三共和国，拥有强大的陆军但战略思想保守。</div>
+                        <div style="font-size:12px;margin-top:5px">起始资源: 人力1.8M | 工业45 | 政治点数90</div>
+                    </div>
+                </div>
+                
+                <div class="country-option" data-country="日本">
+                    <div class="country-flag-large" style="background-color:#d9534f"></div>
+                    <div>
+                        <div class="country-name" style="font-weight:bold">日本</div>
+                        <div style="font-size:14px;color:#666">大日本帝国，拥有强大的海军但资源严重依赖进口。</div>
+                        <div style="font-size:12px;margin-top:5px">起始资源: 人力1.0M | 工业35 | 政治点数70</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top:20px;">
+                <label>
+                    <input type="checkbox" id="enable-ai" checked> 启用AI对手
+                </label>
+                <div style="font-size:12px;color:#666;margin-top:5px;">AI将控制其他国家的行动，创造更具挑战性的游戏体验</div>
+            </div>
+            
+            <button id="start-game" class="start-button" disabled>开始游戏</button>
+        </div>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <div id="game-container" style="display:none">
+        <header>
+            <h1 id="country-header">钢铁雄心4 - <span id="current-country">德国</span></h1>
+            <div>
+                <div id="date-display">1936年1月1日</div>
+                <div class="time-controls">
+                    <button class="time-btn" data-speed="0">暂停</button>
+                    <button class="time-btn active" data-speed="1">正常</button>
+                    <button class="time-btn" data-speed="2">快速</button>
+                    <button class="time-btn" data-speed="3">极速</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="game-area">
+                <!-- 地图区域 -->
+                <div class="map-container" id="game-map">
+                    <!-- 省份和军队将通过JS动态添加 -->
+                </div>
+
+                <!-- 控制面板 -->
+                <div class="controls">
+                    <div class="tab-container">
+                        <div class="tab active" data-tab="resources">资源</div>
+                        <div class="tab" data-tab="diplomacy">外交</div>
+                        <div class="tab" data-tab="military">军事</div>
+                        <div class="tab" data-tab="production">生产</div>
+                        <div class="tab" data-tab="logs">日志</div>
+                    </div>
+                    
+                    <!-- 资源选项卡 -->
+                    <div id="resources-tab" class="tab-content active">
+                        <div class="resource-display">
+                            <div class="resource">
+                                <h3>人力</h3>
+                                <p id="manpower">1.5M</p>
+                            </div>
+                            <div class="resource">
+                                <h3>工业</h3>
+                                <p id="industry">50</p>
+                            </div>
+                            <div class="resource">
+                                <h3>政治点数</h3>
+                                <p id="political-power">100</p>
+                            </div>
+                        </div>
+                        
+                        <div class="resource-display">
+                            <div class="resource">
+                                <h3>石油</h3>
+                                <p id="oil">100</p>
+                            </div>
+                            <div class="resource">
+                                <h3>钢铁</h3>
+                                <p id="steel">200</p>
+                            </div>
+                            <div class="resource">
+                                <h3>橡胶</h3>
+                                <p id="rubber">50</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 外交选项卡 -->
+                    <div id="diplomacy-tab" class="tab-content">
+                        <div class="diplomacy-panel">
+                            <h3>国家关系</h3>
+                            <div id="country-relations">
+                                <!-- 国家关系将通过JS动态添加 -->
+                            </div>
+                            
+                            <h3 style="margin-top:15px;">外交行动</h3>
+                            <div class="diplomacy-option" data-action="improve-relations">改善关系</div>
+                            <div class="diplomacy-option" data-action="trade-agreement">贸易协定</div>
+                            <div class="diplomacy-option" data-action="non-aggression-pact">互不侵犯条约</div>
+                            <div class="diplomacy-option" data-action="military-access">军事通行权</div>
+                            <div class="diplomacy-option" data-action="alliance">结成联盟</div>
+                            <div class="diplomacy-option" data-action="declare-war">宣战</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 军事选项卡 -->
+                    <div id="military-tab" class="tab-content">
+                        <h3>军事力量</h3>
+                        <p>陆军师: <span id="army-divisions">0</span></p>
+                        <p>海军舰船: <span id="navy-ships">0</span></p>
+                        <p>空军飞机: <span id="air-force">0</span></p>
+                        
+                        <div id="selected-unit-info" style="margin-top:15px;display:none;">
+                            <h4>选中单位</h4>
+                            <p>类型: <span id="unit-type"></span></p>
+                            <p>力量: <span id="unit-strength"></span></p>
+                            <p>位置: <span id="unit-location"></span></p>
+                            <button id="move-unit-btn" style="margin-top:10px;">移动单位</button>
+                            <button id="cancel-move-btn" style="margin-top:10px;display:none;">取消移动</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 生产选项卡 -->
+                    <div id="production-tab" class="tab-content">
+                        <h3>军事生产</h3>
+                        <div class="unit-production">
+                            <div class="production-option" data-unit="army">
+                                <strong>步兵师</strong> (消耗: 钢铁50 人力1000)
+                            </div>
+                            <div class="production-option" data-unit="tank">
+                                <strong>装甲师</strong> (消耗: 钢铁150 石油50 人力500)
+                            </div>
+                            <div class="production-option" data-unit="navy">
+                                <strong>驱逐舰</strong> (消耗: 钢铁200 石油100 人力500)
+                            </div>
+                            <div class="production-option" data-unit="air">
+                                <strong>战斗机</strong> (消耗: 钢铁100 石油50 人力200)
+                            </div>
+                        </div>
+                        
+                        <div id="production-queue" style="margin-top:15px;">
+                            <h4>生产队列</h4>
+                            <div id="queue-items"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日志选项卡 -->
+                    <div id="logs-tab" class="tab-content">
+                        <h3>战争与外交日志</h3>
+                        <div class="war-log" id="game-logs">
+                            <!-- 日志将通过JS动态添加 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            date: new Date(1936, 0, 1),
+            playerCountry: null,
+            enableAI: true,
+            gameSpeed: 1,
+            isPaused: false,
+            resources: {
+                manpower: 0,
+                industry: 0,
+                politicalPower: 0,
+                oil: 100,
+                steel: 200,
+                rubber: 50
+            },
+            countries: {
+                "德国": { 
+                    color: "#5bc0de",
+                    aiBehavior: "aggressive",
+                    startingResources: {
+                        manpower: 1500000,
+                        industry: 50,
+                        politicalPower: 100,
+                        oil: 50,
+                        steel: 250,
+                        rubber: 30
+                    },
+                    relations: {
+                        "苏联": -50,
+                        "美国": -30,
+                        "英国": -20,
+                        "法国": -10,
+                        "日本": 20
+                    }
+                },
+                "苏联": { 
+                    color: "#d9534f",
+                    aiBehavior: "defensive",
+                    startingResources: {
+                        manpower: 5000000,
+                        industry: 40,
+                        politicalPower: 80,
+                        oil: 150,
+                        steel: 300,
+                        rubber: 10
+                    },
+                    relations: {
+                        "德国": -50,
+                        "美国": 10,
+                        "英国": 0,
+                        "法国": 10,
+                        "日本": -30
+                    }
+                },
+                "美国": { 
+                    color: "#428bca",
+                    aiBehavior: "neutral",
+                    startingResources: {
+                        manpower: 2000000,
+                        industry: 80,
+                        politicalPower: 150,
+                        oil: 300,
+                        steel: 400,
+                        rubber: 200
+                    },
+                    relations: {
+                        "德国": -30,
+                        "苏联": 10,
+                        "英国": 50,
+                        "法国": 40,
+                        "日本": -20
+                    }
+                },
+                "英国": { 
+                    color: "#5cb85c",
+                    aiBehavior: "colonial",
+                    startingResources: {
+                        manpower: 1200000,
+                        industry: 60,
+                        politicalPower: 120,
+                        oil: 200,
+                        steel: 150,
+                        rubber: 150
+                    },
+                    relations: {
+                        "德国": -20,
+                        "苏联": 0,
+                        "美国": 50,
+                        "法国": 30,
+                        "日本": -40
+                    }
+                },
+                "法国": { 
+                    color: "#f0ad4e",
+                    aiBehavior: "defensive",
+                    startingResources: {
+                        manpower: 1800000,
+                        industry: 45,
+                        politicalPower: 90,
+                        oil: 80,
+                        steel: 200,
+                        rubber: 50
+                    },
+                    relations: {
+                        "德国": -10,
+                        "苏联": 10,
+                        "美国": 40,
+                        "英国": 30,
+                        "日本": -20
+                    }
+                },
+                "日本": { 
+                    color: "#d9534f",
+                    aiBehavior: "aggressive",
+                    startingResources: {
+                        manpower: 1000000,
+                        industry: 35,
+                        politicalPower: 70,
+                        oil: 30,
+                        steel: 100,
+                        rubber: 20
+                    },
+                    relations: {
+                        "德国": 20,
+                        "苏联": -30,
+                        "美国": -20,
+                        "英国": -40,
+                        "法国": -20
+                    }
+                }
+            },
+            provinces: [
+                // 德国
+                { id: 1, name: "柏林", owner: "德国", x: "52%", y: "30%", width: "4%", height: "4%", isCapital: true },
+                { id: 2, name: "慕尼黑", owner: "德国", x: "53%", y: "35%", width: "3%", height: "3%" },
+                { id: 3, name: "汉堡", owner: "德国", x: "50%", y: "28%", width: "3%", height: "3%" },
+                
+                // 苏联
+                { id: 4, name: "莫斯科", owner: "苏联", x: "65%", y: "25%", width: "5%", height: "5%", isCapital: true },
+                { id: 5, name: "列宁格勒", owner: "苏联", x: "60%", y: "23%", width: "4%", height: "4%" },
+                { id: 6, name: "斯大林格勒", owner: "苏联", x: "68%", y: "30%", width: "4%", height: "4%" },
+                
+                // 美国
+                { id: 7, name: "华盛顿", owner: "美国", x: "30%", y: "37%", width: "4%", height: "4%", isCapital: true },
+                { id: 8, name: "纽约", owner: "美国", x: "33%", y: "35%", width: "3%", height: "3%" },
+                { id: 9, name: "洛杉矶", owner: "美国", x: "25%", y: "40%", width: "3%", height: "3%" },
+                
+                // 英国
+                { id: 10, name: "伦敦", owner: "英国", x: "48%", y: "25%", width: "3%", height: "3%", isCapital: true },
+                { id: 11, name: "曼彻斯特", owner: "英国", x: "46%", y: "26%", width: "2%", height: "2%" },
+                
+                // 法国
+                { id: 12, name: "巴黎", owner: "法国", x: "49%", y: "32%", width: "3%", height: "3%", isCapital: true },
+                { id: 13, name: "马赛", owner: "法国", x: "51%", y: "38%", width: "3%", height: "3%" },
+                
+                // 日本
+                { id: 14, name: "东京", owner: "日本", x: "85%", y: "40%", width: "3%", height: "3%", isCapital: true },
+                { id: 15, name: "大阪", owner: "日本", x: "83%", y: "41%", width: "2%", height: "2%" }
+            ],
+            militaryUnits: [],
+            selectedCountry: null,
+            selectedProvince: null,
+            selectedUnit: null,
+            movingUnit: false,
+            productionQueue: [],
+            gameInterval: null,
+            military: {
+                armyDivisions: 0,
+                navyShips: 0,
+                airForce: 0
+            },
+            aiDecisions: [],
+            gameLogs: []
+        };
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置国家选择事件
+            setupCountrySelection();
+            
+            // 设置开始游戏按钮事件
+            document.getElementById('start-game').addEventListener('click', startGame);
+            
+            // 设置选项卡切换
+            setupTabs();
+            
+            // 设置外交行动点击事件
+            setupDiplomacyActions();
+            
+            // 设置时间控制按钮
+            setupTimeControls();
+            
+            // 设置生产选项点击事件
+            setupProductionOptions();
+            
+            // 设置军队移动按钮
+            document.getElementById('move-unit-btn').addEventListener('click', startUnitMovement);
+            document.getElementById('cancel-move-btn').addEventListener('click', cancelUnitMovement);
+            
+            // 设置AI启用选项
+            document.getElementById('enable-ai').addEventListener('change', function() {
+                gameState.enableAI = this.checked;
+            });
+        });
+
+        // 设置国家选择功能
+        function setupCountrySelection() {
+            const countryOptions = document.querySelectorAll('.country-option');
+            
+            countryOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除所有选项的高亮
+                    countryOptions.forEach(opt => {
+                        opt.style.border = "1px solid #ddd";
+                    });
+                    
+                    // 高亮当前选项
+                    this.style.border = "2px solid #2c3e50";
+                    
+                    // 设置选中国家
+                    gameState.playerCountry = this.dataset.country;
+                    console.log("已选择国家:", gameState.playerCountry);
+                    
+                    // 启用开始游戏按钮
+                    document.getElementById('start-game').disabled = false;
+                });
+            });
+        }
+
+        // 设置选项卡切换
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有选项卡的active类
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前选项卡的active类
+                    this.classList.add('active');
+                    
+                    // 隐藏所有内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // 显示对应内容
+                    const tabId = this.dataset.tab + '-tab';
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        // 设置外交行动
+        function setupDiplomacyActions() {
+            const diplomacyOptions = document.querySelectorAll('.diplomacy-option');
+            
+            diplomacyOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!gameState.selectedCountry) {
+                        alert("请先选择一个国家");
+                        return;
+                    }
+                    
+                    const action = this.dataset.action;
+                    const targetCountry = gameState.selectedCountry;
+                    
+                    switch(action) {
+                        case 'improve-relations':
+                            improveRelations(targetCountry);
+                            break;
+                        case 'trade-agreement':
+                            proposeTradeAgreement(targetCountry);
+                            break;
+                        case 'non-aggression-pact':
+                            proposeNonAggressionPact(targetCountry);
+                            break;
+                        case 'military-access':
+                            requestMilitaryAccess(targetCountry);
+                            break;
+                        case 'alliance':
+                            proposeAlliance(targetCountry);
+                            break;
+                        case 'declare-war':
+                            declareWar(targetCountry);
+                            break;
+                    }
+                });
+            });
+        }
+
+        // 设置时间控制
+        function setupTimeControls() {
+            const timeButtons = document.querySelectorAll('.time-btn');
+            
+            timeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const speed = parseInt(this.dataset.speed);
+                    
+                    // 更新按钮状态
+                    timeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 设置游戏速度
+                    gameState.gameSpeed = speed;
+                    gameState.isPaused = speed === 0;
+                    
+                    // 如果之前有计时器，清除它
+                    if (gameState.gameInterval) {
+                        clearInterval(gameState.gameInterval);
+                    }
+                    
+                    // 如果不是暂停状态，启动计时器
+                    if (!gameState.isPaused) {
+                        const interval = 1000 / speed; // 速度越快，间隔越短
+                        gameState.gameInterval = setInterval(advanceTime, interval);
+                    }
+                });
+            });
+        }
+
+        // 设置生产选项
+        function setupProductionOptions() {
+            const productionOptions = document.querySelectorAll('.production-option');
+            
+            productionOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const unitType = this.dataset.unit;
+                    produceMilitaryUnit(unitType);
+                });
+            });
+        }
+
+        // 开始游戏
+        function startGame() {
+            if (!gameState.playerCountry) {
+                alert("请先选择一个国家");
+                return;
+            }
+            
+            console.log("开始游戏，国家:", gameState.playerCountry);
+            
+            // 隐藏国家选择界面
+            document.getElementById('country-select').style.display = 'none';
+            
+            // 显示游戏界面
+            document.getElementById('game-container').style.display = 'block';
+            
+            // 更新标题
+            document.getElementById('current-country').textContent = gameState.playerCountry;
+            
+            // 设置初始资源
+            const countryData = gameState.countries[gameState.playerCountry];
+            if (countryData && countryData.startingResources) {
+                gameState.resources = {...countryData.startingResources};
+                
+                // 设置初始军事力量
+                gameState.military.armyDivisions = Math.floor(gameState.resources.industry / 5);
+                gameState.military.navyShips = Math.floor(gameState.resources.industry / 10);
+                gameState.military.airForce = Math.floor(gameState.resources.industry / 8);
+                
+                // 创建初始军事单位
+                createInitialMilitaryUnits();
+                
+                updateResourceDisplay();
+                updateMilitaryDisplay();
+            } else {
+                alert("错误：找不到所选国家的初始数据");
+                return;
+            }
+            
+            // 渲染省份
+            renderProvinces();
+            
+            // 更新国家关系显示
+            updateCountryRelations();
+            
+            // 添加初始日志
+            addGameLog(`游戏开始！你选择了${gameState.playerCountry}作为你的国家。`, "diplomacy");
+            
+            // 启动游戏时间
+            gameState.gameInterval = setInterval(advanceTime, 1000);
+            
+            // 初始化AI国家
+            if (gameState.enableAI) {
+                initializeAICountries();
+            }
+        }
+
+        // 初始化AI国家
+        function initializeAICountries() {
+            // 为每个AI国家创建初始军事单位
+            for (const country in gameState.countries) {
+                if (country !== gameState.playerCountry) {
+                    const countryData = gameState.countries[country];
+                    const armyDivisions = Math.floor(countryData.startingResources.industry / 5);
+                    const navyShips = Math.floor(countryData.startingResources.industry / 10);
+                    const airForce = Math.floor(countryData.startingResources.industry / 8);
+                    
+                    const provinces = gameState.provinces.filter(p => p.owner === country);
+                    
+                    // 创建陆军单位
+                    for (let i = 0; i < armyDivisions && i < provinces.length; i++) {
+                        createAIMilitaryUnit(country, 'army', provinces[i]);
+                    }
+                    
+                    // 创建海军单位 (只在沿海省份)
+                    const coastalProvinces = provinces.filter(p => 
+                        p.name === "伦敦" || p.name === "东京" || p.name === "华盛顿" || p.name === "洛杉矶" || p.name === "马赛");
+                    
+                    for (let i = 0; i < navyShips && i < coastalProvinces.length; i++) {
+                        createAIMilitaryUnit(country, 'navy', coastalProvinces[i]);
+                    }
+                    
+                    // 创建空军单位
+                    for (let i = 0; i < airForce && i < provinces.length; i++) {
+                        createAIMilitaryUnit(country, 'air', provinces[i]);
+                    }
+                }
+            }
+        }
+
+        // 创建AI军事单位
+        function createAIMilitaryUnit(country, type, province) {
+            const unitId = gameState.militaryUnits.length + 1;
+            const unit = {
+                id: unitId,
+                type: type,
+                strength: 100,
+                location: province.id,
+                destination: null,
+                movementProgress: 0,
+                owner: country
+            };
+            
+            gameState.militaryUnits.push(unit);
+            renderMilitaryUnit(unit);
+            return unit;
+        }
+
+        // 创建初始军事单位
+        function createInitialMilitaryUnits() {
+            const playerProvinces = gameState.provinces.filter(p => p.owner === gameState.playerCountry);
+            
+            // 创建陆军单位
+            for (let i = 0; i < gameState.military.armyDivisions; i++) {
+                const province = playerProvinces[i % playerProvinces.length];
+                createMilitaryUnit('army', province);
+            }
+            
+            // 创建海军单位 (只在沿海省份)
+            const coastalProvinces = playerProvinces.filter(p => 
+                p.name === "伦敦" || p.name === "东京" || p.name === "华盛顿" || p.name === "洛杉矶" || p.name === "马赛");
+            
+            for (let i = 0; i < gameState.military.navyShips && i < coastalProvinces.length; i++) {
+                createMilitaryUnit('navy', coastalProvinces[i]);
+            }
+            
+            // 创建空军单位
+            for (let i = 0; i < gameState.military.airForce && i < playerProvinces.length; i++) {
+                createMilitaryUnit('air', playerProvinces[i]);
+            }
+        }
+
+        // 创建军事单位
+        function createMilitaryUnit(type, province) {
+            const unitId = gameState.militaryUnits.length + 1;
+            const unit = {
+                id: unitId,
+                type: type,
+                strength: 100,
+                location: province.id,
+                destination: null,
+                movementProgress: 0,
+                owner: gameState.playerCountry
+            };
+            
+            gameState.militaryUnits.push(unit);
+            renderMilitaryUnit(unit);
+            return unit;
+        }
+
+        // 渲染军事单位
+        function renderMilitaryUnit(unit) {
+            const province = gameState.provinces.find(p => p.id === unit.location);
+            if (!province) return;
+            
+            // 移除已存在的单位元素
+            const existingUnit = document.querySelector(`.military-unit[data-unit-id="${unit.id}"]`);
+            if (existingUnit) {
+                existingUnit.remove();
+            }
+            
+            const unitEl = document.createElement('div');
+            unitEl.className = `military-unit ${unit.type}`;
+            if (unit.owner !== gameState.playerCountry) {
+                unitEl.classList.add('enemy');
+            }
+            unitEl.dataset.unitId = unit.id;
+            
+            // 设置位置 - 在省份内随机位置
+            const provinceEl = document.querySelector(`.province[data-id="${unit.location}"]`);
+            if (!provinceEl) return;
+            
+            const provinceRect = provinceEl.getBoundingClientRect();
+            const mapRect = document.getElementById('game-map').getBoundingClientRect();
+            
+            // 计算相对于地图的位置
+            const left = provinceRect.left - mapRect.left + Math.random() * provinceRect.width;
+            const top = provinceRect.top - mapRect.top + Math.random() * provinceRect.height;
+            
+            unitEl.style.left = `${left}px`;
+            unitEl.style.top = `${top}px`;
+            
+            // 设置单位图标
+            let icon = '';
+            if (unit.type === 'army') icon = 'A';
+            else if (unit.type === 'navy') icon = 'N';
+            else if (unit.type === 'air') icon = 'F';
+            
+            unitEl.textContent = icon;
+            
+            // 点击事件
+            unitEl.addEventListener('click', function(e) {
+                e.stopPropagation(); // 防止触发省份点击事件
+                
+                // 只能选择玩家自己的单位
+                if (unit.owner !== gameState.playerCountry) return;
+                
+                // 如果正在移动单位，设置目的地
+                if (gameState.movingUnit && gameState.selectedUnit) {
+                    const targetProvince = gameState.provinces.find(p => p.id === unit.location);
+                    if (targetProvince.owner !== gameState.playerCountry && 
+                        gameState.countries[gameState.playerCountry].relations[targetProvince.owner] < 0) {
+                        alert("无法移动到敌对国家的领土！");
+                        return;
+                    }
+                    
+                    gameState.selectedUnit.destination = unit.location;
+                    gameState.movingUnit = false;
+                    document.getElementById('cancel-move-btn').style.display = 'none';
+                    
+                    // 绘制移动线
+                    drawMovementLine(gameState.selectedUnit);
+                    
+                    return;
+                }
+                
+                // 否则选择单位
+                selectUnit(unit);
+            });
+            
+            document.getElementById('game-map').appendChild(unitEl);
+        }
+
+        // 选择单位
+        function selectUnit(unit) {
+            // 取消之前选中的单位
+            if (gameState.selectedUnit) {
+                const prevSelected = document.querySelector(`.military-unit[data-unit-id="${gameState.selectedUnit.id}"]`);
+                if (prevSelected) prevSelected.classList.remove('selected');
+            }
+            
+            // 选择新单位
+            gameState.selectedUnit = unit;
+            const unitEl = document.querySelector(`.military-unit[data-unit-id="${unit.id}"]`);
+            if (unitEl) unitEl.classList.add('selected');
+            
+            // 更新单位信息显示
+            const province = gameState.provinces.find(p => p.id === unit.location);
+            document.getElementById('unit-type').textContent = 
+                unit.type === 'army' ? '陆军' : unit.type === 'navy' ? '海军' : '空军';
+            document.getElementById('unit-strength').textContent = unit.strength;
+            document.getElementById('unit-location').textContent = province ? province.name : '未知';
+            
+            document.getElementById('selected-unit-info').style.display = 'block';
+        }
+
+        // 开始移动单位
+        function startUnitMovement() {
+            if (!gameState.selectedUnit) return;
+            
+            gameState.movingUnit = true;
+            document.getElementById('cancel-move-btn').style.display = 'inline-block';
+            
+            // 移除之前的移动线
+            const oldLine = document.querySelector('.movement-line');
+            if (oldLine) oldLine.remove();
+            
+            alert("请点击目标省份或单位");
+        }
+
+        // 取消移动单位
+        function cancelUnitMovement() {
+            gameState.movingUnit = false;
+            document.getElementById('cancel-move-btn').style.display = 'none';
+            
+            // 移除移动线
+            const line = document.querySelector('.movement-line');
+            if (line) line.remove();
+        }
+
+        // 绘制移动线
+        function drawMovementLine(unit) {
+            const startProvince = gameState.provinces.find(p => p.id === unit.location);
+            const endProvince = gameState.provinces.find(p => p.id === unit.destination);
+            
+            if (!startProvince || !endProvince) return;
+            
+            // 移除旧的移动线
+            const oldLine = document.querySelector(`.movement-line[data-unit-id="${unit.id}"]`);
+            if (oldLine) oldLine.remove();
+            
+            // 创建新的移动线
+            const line = document.createElement('div');
+            line.className = unit.owner === gameState.playerCountry ? 'movement-line' : 'enemy-movement-line';
+            line.dataset.unitId = unit.id;
+            
+            // 获取省份位置
+            const startEl = document.querySelector(`.province[data-id="${startProvince.id}"]`);
+            const endEl = document.querySelector(`.province[data-id="${endProvince.id}"]`);
+            
+            if (!startEl || !endEl) return;
+            
+            const startRect = startEl.getBoundingClientRect();
+            const endRect = endEl.getBoundingClientRect();
+            const mapRect = document.getElementById('game-map').getBoundingClientRect();
+            
+            // 计算线的起点和终点
+            const startX = startRect.left - mapRect.left + startRect.width / 2;
+            const startY = startRect.top - mapRect.top + startRect.height / 2;
+            const endX = endRect.left - mapRect.left + endRect.width / 2;
+            const endY = endRect.top - mapRect.top + endRect.height / 2;
+            
+            // 计算线的长度和角度
+            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            
+            // 设置线的样式
+            line.style.width = `${length}px`;
+            line.style.left = `${startX}px`;
+            line.style.top = `${startY}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            document.getElementById('game-map').appendChild(line);
+        }
+
+        // 生产军事单位
+        function produceMilitaryUnit(unitType) {
+            const costs = {
+                army: { steel: 50, manpower: 1000 },
+                tank: { steel: 150, oil: 50, manpower: 500 },
+                navy: { steel: 200, oil: 100, manpower: 500 },
+                air: { steel: 100, oil: 50, manpower: 200 }
+            };
+            
+            const cost = costs[unitType];
+            if (!cost) return;
+            
+            // 检查资源是否足够
+            for (const resource in cost) {
+                if (gameState.resources[resource] < cost[resource]) {
+                    alert(`${resource}资源不足！`);
+                    return;
+                }
+            }
+            
+            // 扣除资源
+            for (const resource in cost) {
+                gameState.resources[resource] -= cost[resource];
+            }
+            
+            // 添加到生产队列
+            const productionTime = {
+                army: 30,
+                tank: 60,
+                navy: 90,
+                air: 45
+            };
+            
+            gameState.productionQueue.push({
+                type: unitType,
+                progress: 0,
+                total: productionTime[unitType] || 30
+            });
+            
+            updateResourceDisplay();
+            updateProductionQueue();
+        }
+
+        // 渲染所有省份
+        function renderProvinces() {
+            const map = document.getElementById('game-map');
+            map.innerHTML = '';
+            
+            gameState.provinces.forEach(province => {
+                const country = gameState.countries[province.owner];
+                if (!country) {
+                    console.error("找不到国家数据:", province.owner);
+                    return;
+                }
+                
+                const provinceEl = document.createElement('div');
+                provinceEl.className = 'province' + (province.isCapital ? ' capital' : '');
+                
+                // 设置位置和大小
+                provinceEl.style.left = province.x;
+                provinceEl.style.top = province.y;
+                provinceEl.style.width = province.width;
+                provinceEl.style.height = province.height;
+                provinceEl.style.backgroundColor = country.color;
+                
+                provinceEl.textContent = province.name;
+                provinceEl.dataset.id = province.id;
+                provinceEl.dataset.owner = province.owner;
+                
+                provinceEl.addEventListener('click', function() {
+                    const owner = this.dataset.owner;
+                    
+                    // 如果正在移动单位，设置目的地
+                    if (gameState.movingUnit && gameState.selectedUnit) {
+                        if (owner !== gameState.playerCountry && 
+                            gameState.countries[gameState.playerCountry].relations[owner] < 0) {
+                            alert("无法移动到敌对国家的领土！");
+                            return;
+                        }
+                        
+                        gameState.selectedUnit.destination = province.id;
+                        gameState.movingUnit = false;
+                        document.getElementById('cancel-move-btn').style.display = 'none';
+                        
+                        // 绘制移动线
+                        drawMovementLine(gameState.selectedUnit);
+                        
+                        return;
+                    }
+                    
+                    // 否则选择省份
+                    gameState.selectedCountry = owner;
+                    updateCountryRelations();
+                });
+                
+                map.appendChild(provinceEl);
+            });
+            
+            // 重新渲染军事单位
+            gameState.militaryUnits.forEach(unit => {
+                renderMilitaryUnit(unit);
+            });
+            
+            // 重新绘制移动线
+            gameState.militaryUnits.forEach(unit => {
+                if (unit.destination) {
+                    drawMovementLine(unit);
+                }
+            });
+        }
+
+        // 更新资源显示
+        function updateResourceDisplay() {
+            document.getElementById('manpower').textContent = 
+                (gameState.resources.manpower >= 1000000 ? 
+                 (gameState.resources.manpower/1000000).toFixed(1) + "M" : 
+                 gameState.resources.manpower.toLocaleString());
+            document.getElementById('industry').textContent = gameState.resources.industry;
+            document.getElementById('political-power').textContent = gameState.resources.politicalPower;
+            document.getElementById('oil').textContent = gameState.resources.oil;
+            document.getElementById('steel').textContent = gameState.resources.steel;
+            document.getElementById('rubber').textContent = gameState.resources.rubber;
+        }
+        
+        // 更新军事显示
+        function updateMilitaryDisplay() {
+            // 只计算玩家自己的单位
+            const playerUnits = gameState.militaryUnits.filter(u => u.owner === gameState.playerCountry);
+            
+            const armyDivisions = playerUnits.filter(u => u.type === 'army').length;
+            const navyShips = playerUnits.filter(u => u.type === 'navy').length;
+            const airForce = playerUnits.filter(u => u.type === 'air').length;
+            
+            document.getElementById('army-divisions').textContent = armyDivisions;
+            document.getElementById('navy-ships').textContent = navyShips;
+            document.getElementById('air-force').textContent = airForce;
+        }
+        
+        // 更新国家关系显示
+        function updateCountryRelations() {
+            const relationsContainer = document.getElementById('country-relations');
+            relationsContainer.innerHTML = '';
+            
+            const playerCountry = gameState.playerCountry;
+            const relations = gameState.countries[playerCountry].relations;
+            
+            for (const country in relations) {
+                if (country === playerCountry) continue;
+                
+                const relationValue = relations[country];
+                let relationClass, relationText;
+                
+                if (relationValue >= 50) {
+                    relationClass = 'relation-ally';
+                    relationText = '盟友';
+                } else if (relationValue >= 20) {
+                    relationClass = 'relation-friendly';
+                    relationText = '友好';
+                } else if (relationValue <= -20) {
+                    relationClass = 'relation-hostile';
+                    relationText = '敌对';
+                } else {
+                    relationClass = 'relation-neutral';
+                    relationText = '中立';
+                }
+                
+                // 如果是当前选中的国家，添加高亮样式
+                const isSelected = gameState.selectedCountry === country;
+                const selectedStyle = isSelected ? 'background-color: #e6f7ff;' : '';
+                
+                const relationEl = document.createElement('div');
+                relationEl.className = 'diplomacy-option';
+                relationEl.style = selectedStyle;
+                relationEl.innerHTML = `
+                    <span class="relation-indicator ${relationClass}"></span>
+                    <strong>${country}</strong>: ${relationText} (${relationValue})
+                `;
+                
+                relationEl.addEventListener('click', function() {
+                    gameState.selectedCountry = country;
+                    updateCountryRelations();
+                });
+                
+                relationsContainer.appendChild(relationEl);
+            }
+        }
+        
+        // 更新生产队列
+        function updateProductionQueue() {
+            const queueContainer = document.getElementById('queue-items');
+            queueContainer.innerHTML = '';
+            
+            gameState.productionQueue.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'production-option';
+                
+                let unitName = '';
+                if (item.type === 'army') unitName = '步兵师';
+                else if (item.type === 'tank') unitName = '装甲师';
+                else if (item.type === 'navy') unitName = '驱逐舰';
+                else if (item.type === 'air') unitName = '战斗机';
+                
+                itemEl.innerHTML = `
+                    <strong>${unitName}</strong> - 完成度: ${Math.floor(item.progress / item.total * 100)}%
+                    <div style="height:5px;background:#ddd;margin-top:5px;">
+                        <div style="height:100%;background:#5cb85c;width:${item.progress / item.total * 100}%"></div>
+                    </div>
+                `;
+                
+                queueContainer.appendChild(itemEl);
+            });
+        }
+        
+        // 添加游戏日志
+        function addGameLog(message, type = "info") {
+            const logEntry = {
+                message: message,
+                type: type,
+                date: new Date(gameState.date)
+            };
+            
+            gameState.gameLogs.push(logEntry);
+            
+            // 更新日志显示
+            updateGameLogs();
+        }
+        
+        // 更新游戏日志显示
+        function updateGameLogs() {
+            const logsContainer = document.getElementById('game-logs');
+            logsContainer.innerHTML = '';
+            
+            // 只显示最近的20条日志
+            const recentLogs = gameState.gameLogs.slice(-20).reverse();
+            
+            recentLogs.forEach(log => {
+                const logEl = document.createElement('div');
+                logEl.className = `log-entry ${log.type}`;
+                
+                const dateStr = `${log.date.getFullYear()}-${log.date.getMonth()+1}-${log.date.getDate()}`;
+                logEl.innerHTML = `<strong>[${dateStr}]</strong> ${log.message}`;
+                
+                logsContainer.appendChild(logEl);
+            });
+        }
+        
+        // 时间推进
+        function advanceTime() {
+            // 更新日期
+            gameState.date.setDate(gameState.date.getDate() + 1);
+            
+            // 更新日期显示
+            const year = gameState.date.getFullYear();
+            const month = gameState.date.getMonth() + 1;
+            const day = gameState.date.getDate();
+            document.getElementById('date-display').textContent = `${year}年${month}月${day}日`;
+            
+            // 资源增长
+            gameState.resources.industry += 0.1 * gameState.gameSpeed;
+            gameState.resources.manpower += 100 * gameState.gameSpeed;
+            gameState.resources.politicalPower += 0.2 * gameState.gameSpeed;
+            
+            // 更新资源显示
+            updateResourceDisplay();
+            
+            // 处理生产队列
+            processProductionQueue();
+            
+            // 处理单位移动
+            processUnitMovement();
+            
+            // AI决策
+            if (gameState.enableAI) {
+                processAIDecisions();
+            }
+        }
+        
+        // 处理生产队列
+        function processProductionQueue() {
+            for (let i = gameState.productionQueue.length - 1; i >= 0; i--) {
+                gameState.productionQueue[i].progress += gameState.gameSpeed;
+                
+                if (gameState.productionQueue[i].progress >= gameState.productionQueue[i].total) {
+                    // 生产完成
+                    const unitType = gameState.productionQueue[i].type;
+                    
+                    // 找到一个合适的省份放置新单位
+                    const playerProvinces = gameState.provinces.filter(p => p.owner === gameState.playerCountry);
+                    if (playerProvinces.length > 0) {
+                        // 对于海军单位，只放在沿海省份
+                        let province;
+                        if (unitType === 'navy') {
+                            const coastalProvinces = playerProvinces.filter(p => 
+                                p.name === "伦敦" || p.name === "东京" || p.name === "华盛顿" || p.name === "洛杉矶" || p.name === "马赛");
+                            province = coastalProvinces.length > 0 ? coastalProvinces[0] : playerProvinces[0];
+                        } else {
+                            province = playerProvinces[0];
+                        }
+                        
+                        createMilitaryUnit(unitType, province);
+                        
+                        // 更新军事计数
+                        updateMilitaryDisplay();
+                        
+                        addGameLog(`新的${getUnitName(unitType)}生产完成，部署在${province.name}`, "info");
+                    }
+                    
+                    // 从队列中移除
+                    gameState.productionQueue.splice(i, 1);
+                }
+            }
+            
+            updateProductionQueue();
+        }
+        
+        // 获取单位名称
+        function getUnitName(type) {
+            switch(type) {
+                case 'army': return '步兵师';
+                case 'tank': return '装甲师';
+                case 'navy': return '驱逐舰';
+                case 'air': return '战斗机';
+                default: return '军事单位';
+            }
+        }
+        
+        // 处理单位移动
+        function processUnitMovement() {
+            gameState.militaryUnits.forEach(unit => {
+                if (unit.destination !== null && unit.destination !== unit.location) {
+                    // 移动进度
+                    unit.movementProgress += 0.1 * gameState.gameSpeed;
+                    
+                    // 如果到达目的地
+                    if (unit.movementProgress >= 1) {
+                        const oldProvince = gameState.provinces.find(p => p.id === unit.location);
+                        const newProvince = gameState.provinces.find(p => p.id === unit.destination);
+                        
+                        unit.location = unit.destination;
+                        unit.destination = null;
+                        unit.movementProgress = 0;
+                        
+                        // 移除移动线
+                        const line = document.querySelector(`.movement-line[data-unit-id="${unit.id}"]`);
+                        if (line) line.remove();
+                        
+                        // 如果是玩家单位，添加日志
+                        if (unit.owner === gameState.playerCountry) {
+                            addGameLog(`你的${getUnitName(unit.type)}已从${oldProvince.name}移动到${newProvince.name}`, "info");
+                        }
+                        
+                        // 检查是否到达敌方领土
+                        if (newProvince.owner !== unit.owner) {
+                            handleCombat(unit, newProvince);
+                        }
+                    }
+                    
+                    // 重新渲染单位
+                    renderMilitaryUnit(unit);
+                }
+            });
+        }
+        
+        // 处理战斗
+        function handleCombat(unit, targetProvince) {
+            // 简单战斗逻辑 - 50%几率获胜
+            const attackerWins = Math.random() > 0.5;
+            
+            if (attackerWins) {
+                // 攻击方获胜
+                const oldOwner = targetProvince.owner;
+                targetProvince.owner = unit.owner;
+                
+                // 更新省份显示
+                renderProvinces();
+                
+                // 添加日志
+                if (unit.owner === gameState.playerCountry) {
+                    addGameLog(`你的军队成功占领了${targetProvince.name}！`, "war");
+                    
+                    // 如果占领的是首都
+                    if (targetProvince.isCapital) {
+                        addGameLog(`重大胜利！你占领了${oldOwner}的首都${targetProvince.name}！`, "war");
+                    }
+                } else if (targetProvince.owner === gameState.playerCountry) {
+                    addGameLog(`${unit.owner}的军队占领了你的${targetProvince.name}！`, "war");
+                    
+                    // 如果失去的是首都
+                    if (targetProvince.isCapital) {
+                        addGameLog(`严重危机！你失去了首都${targetProvince.name}！`, "war");
+                    }
+                }
+            } else {
+                // 防御方获胜
+                unit.strength -= 30; // 单位受损
+                
+                if (unit.strength <= 0) {
+                    // 单位被消灭
+                    const index = gameState.militaryUnits.indexOf(unit);
+                    if (index !== -1) {
+                        gameState.militaryUnits.splice(index, 1);
+                    }
+                    
+                    // 移除单位元素
+                    const unitEl = document.querySelector(`.military-unit[data-unit-id="${unit.id}"]`);
+                    if (unitEl) unitEl.remove();
+                    
+                    // 添加日志
+                    if (unit.owner === gameState.playerCountry) {
+                        addGameLog(`你的军队在进攻${targetProvince.name}时被消灭！`, "war");
+                    } else if (targetProvince.owner === gameState.playerCountry) {
+                        addGameLog(`你的守军成功击退了${unit.owner}的进攻！`, "war");
+                    }
+                } else {
+                    // 单位撤退
+                    unit.destination = null;
+                    unit.movementProgress = 0;
+                    
+                    // 移除移动线
+                    const line = document.querySelector(`.movement-line[data-unit-id="${unit.id}"]`);
+                    if (line) line.remove();
+                    
+                    // 添加日志
+                    if (unit.owner === gameState.playerCountry) {
+                        addGameLog(`你的军队进攻${targetProvince.name}失败，被迫撤退！`, "war");
+                    } else if (targetProvince.owner === gameState.playerCountry) {
+                        addGameLog(`${unit.owner}的军队进攻${targetProvince.name}失败！`, "war");
+                    }
+                }
+            }
+            
+            // 更新军事显示
+            updateMilitaryDisplay();
+        }
+        
+        // 处理AI决策
+        function processAIDecisions() {
+            // 每10天做一次决策
+            if (gameState.date.getDate() % 10 !== 0) return;
+            
+            // 为每个AI国家做决策
+            for (const country in gameState.countries) {
+                if (country !== gameState.playerCountry) {
+                    makeAIDecision(country);
+                }
+            }
+        }
+        
+        // AI做出决策
+        function makeAIDecision(country) {
+            const countryData = gameState.countries[country];
+            const behavior = countryData.aiBehavior;
+            
+            // 根据AI行为类型做出不同决策
+            switch(behavior) {
+                case "aggressive":
+                    // 侵略性AI - 更可能宣战和扩张
+                    if (Math.random() < 0.3) {
+                        // 30%几率宣战
+                        declareAIWar(country);
+                    } else if (Math.random() < 0.5) {
+                        // 50%几率移动军队
+                        moveAIUnits(country);
+                    } else if (Math.random() < 0.4) {
+                        // 40%几率生产单位
+                        produceAIUnit(country);
+                    }
+                    break;
+                    
+                case "defensive":
+                    // 防御性AI - 专注于防御和改善关系
+                    if (Math.random() < 0.1) {
+                        // 10%几率宣战
+                        declareAIWar(country);
+                    } else if (Math.random() < 0.3) {
+                        // 30%几率移动军队
+                        moveAIUnits(country);
+                    } else if (Math.random() < 0.6) {
+                        // 60%几率生产单位
+                        produceAIUnit(country);
+                    }
+                    break;
+                    
+                case "colonial":
+                    // 殖民型AI - 专注于海军和海外扩张
+                    if (Math.random() < 0.2) {
+                        // 20%几率宣战
+                        declareAIWar(country);
+                    } else if (Math.random() < 0.4) {
+                        // 40%几率移动海军
+                        moveAINavy(country);
+                    } else if (Math.random() < 0.5) {
+                        // 50%几率生产海军
+                        produceAINavy(country);
+                    }
+                    break;
+                    
+                default:
+                    // 中立型AI - 不太可能采取激进行动
+                    if (Math.random() < 0.05) {
+                        // 5%几率宣战
+                        declareAIWar(country);
+                    } else if (Math.random() < 0.2) {
+                        // 20%几率移动单位
+                        moveAIUnits(country);
+                    }
+            }
+        }
+        
+        // AI宣战
+        function declareAIWar(country) {
+            // 找出关系最差的国家
+            let worstRelation = 100;
+            let target = null;
+            
+            for (const otherCountry in gameState.countries[country].relations) {
+                if (otherCountry !== country) {
+                    const relation = gameState.countries[country].relations[otherCountry];
+                    if (relation < worstRelation) {
+                        worstRelation = relation;
+                        target = otherCountry;
+                    }
+                }
+            }
+            
+            // 如果关系足够差，宣战
+            if (target && worstRelation < -30) {
+                gameState.countries[country].relations[target] = -100;
+                
+                // 添加日志
+                addGameLog(`${country}向${target}宣战！`, "war");
+                
+                // 更新关系显示
+                if (target === gameState.playerCountry || country === gameState.playerCountry) {
+                    updateCountryRelations();
+                }
+            }
+        }
+        
+        // AI移动单位
+        function moveAIUnits(country) {
+            const aiUnits = gameState.militaryUnits.filter(u => u.owner === country && u.destination === null);
+            
+            if (aiUnits.length === 0) return;
+            
+            // 随机选择一个单位
+            const unit = aiUnits[Math.floor(Math.random() * aiUnits.length)];
+            
+            // 找出相邻的省份
+            const currentProvince = gameState.provinces.find(p => p.id === unit.location);
+            const adjacentProvinces = getAdjacentProvinces(currentProvince);
+            
+            if (adjacentProvinces.length > 0) {
+                // 随机选择一个相邻省份
+                const targetProvince = adjacentProvinces[Math.floor(Math.random() * adjacentProvinces.length)];
+                
+                // 如果目标是玩家领土且关系敌对，或者目标是AI领土且关系敌对
+                if ((targetProvince.owner === gameState.playerCountry && 
+                     gameState.countries[country].relations[gameState.playerCountry] < 0) ||
+                    (targetProvince.owner !== gameState.playerCountry && 
+                     targetProvince.owner !== country &&
+                     gameState.countries[country].relations[targetProvince.owner] < 0)) {
+                    
+                    unit.destination = targetProvince.id;
+                    drawMovementLine(unit);
+                    
+                    // 添加日志
+                    if (targetProvince.owner === gameState.playerCountry) {
+                        addGameLog(`${country}的军队正在向你的${targetProvince.name}移动！`, "war");
+                    }
+                } else if (targetProvince.owner === country) {
+                    // 移动到自己的领土
+                    unit.destination = targetProvince.id;
+                    drawMovementLine(unit);
+                }
+            }
+        }
+        
+        // AI移动海军
+        function moveAINavy(country) {
+            const aiNavalUnits = gameState.militaryUnits.filter(u => u.owner === country && u.type === 'navy' && u.destination === null);
+            
+            if (aiNavalUnits.length === 0) return;
+            
+            // 随机选择一个海军单位
+            const unit = aiNavalUnits[Math.floor(Math.random() * aiNavalUnits.length)];
+            
+            // 找出沿海省份
+            const coastalProvinces = gameState.provinces.filter(p => 
+                p.name === "伦敦" || p.name === "东京" || p.name === "华盛顿" || p.name === "洛杉矶" || p.name === "马赛");
+            
+            if (coastalProvinces.length > 1) {
+                // 随机选择一个沿海省份
+                let targetProvince;
+                do {
+                    targetProvince = coastalProvinces[Math.floor(Math.random() * coastalProvinces.length)];
+                } while (targetProvince.id === unit.location);
+                
+                // 如果目标是玩家领土且关系敌对，或者目标是AI领土且关系敌对
+                if ((targetProvince.owner === gameState.playerCountry && 
+                     gameState.countries[country].relations[gameState.playerCountry] < 0) ||
+                    (targetProvince.owner !== gameState.playerCountry && 
+                     targetProvince.owner !== country &&
+                     gameState.countries[country].relations[targetProvince.owner] < 0)) {
+                    
+                    unit.destination = targetProvince.id;
+                    drawMovementLine(unit);
+                    
+                    // 添加日志
+                    if (targetProvince.owner === gameState.playerCountry) {
+                        addGameLog(`${country}的海军正在向你的${targetProvince.name}移动！`, "war");
+                    }
+                } else if (targetProvince.owner === country) {
+                    // 移动到自己的领土
+                    unit.destination = targetProvince.id;
+                    drawMovementLine(unit);
+                }
+            }
+        }
+        
+        // 获取相邻省份
+        function getAdjacentProvinces(province) {
+            // 简化版 - 实际游戏中应该有更精确的相邻关系
+            const provincePos = {
+                x: parseInt(province.x),
+                y: parseInt(province.y)
+            };
+            
+            return gameState.provinces.filter(p => {
+                const pPos = {
+                    x: parseInt(p.x),
+                    y: parseInt(p.y)
+                };
+                
+                // 简单判断是否相邻
+                const distance = Math.sqrt(
+                    Math.pow(pPos.x - provincePos.x, 2) + 
+                    Math.pow(pPos.y - provincePos.y, 2)
+                );
+                
+                return distance < 10 && p.id !== province.id;
+            });
+        }
+        
+        // AI生产单位
+        function produceAIUnit(country) {
+            // 简单随机选择生产类型
+            const unitTypes = ['army', 'army', 'army', 'tank', 'air']; // 更高几率生产陆军
+            const unitType = unitTypes[Math.floor(Math.random() * unitTypes.length)];
+            
+            // 找到一个合适的省份放置新单位
+            const provinces = gameState.provinces.filter(p => p.owner === country);
+            if (provinces.length === 0) return;
+            
+            let province;
+            if (unitType === 'navy') {
+                const coastalProvinces = provinces.filter(p => 
+                    p.name === "伦敦" || p.name === "东京" || p.name === "华盛顿" || p.name === "洛杉矶" || p.name === "马赛");
+                province = coastalProvinces.length > 0 ? coastalProvinces[0] : provinces[0];
+            } else {
+                province = provinces[0];
+            }
+            
+            createAIMilitaryUnit(country, unitType, province);
+            
+            // 添加日志
+            addGameLog(`${country}生产了新的${getUnitName(unitType)}`, "info");
+        }
+        
+        // AI生产海军
+        function produceAINavy(country) {
+            // 找到一个沿海省份
+            const coastalProvinces = gameState.provinces.filter(p => 
+                p.owner === country && 
+                (p.name === "伦敦" || p.name === "东京" || p.name === "华盛顿" || p.name === "洛杉矶" || p.name === "马赛"));
+            
+            if (coastalProvinces.length > 0) {
+                const province = coastalProvinces[0];
+                createAIMilitaryUnit(country, 'navy', province);
+                
+                // 添加日志
+                addGameLog(`${country}生产了新的${getUnitName('navy')}`, "info");
+            }
+        }
+        
+        // 外交行动函数
+        function improveRelations(targetCountry) {
+            const cost = 10;
+            if (gameState.resources.politicalPower < cost) {
+                alert("政治点数不足！");
+                return;
+            }
+            
+            gameState.resources.politicalPower -= cost;
+            gameState.countries[gameState.playerCountry].relations[targetCountry] += 10;
+            
+            updateResourceDisplay();
+            updateCountryRelations();
+            
+            addGameLog(`你改善了与${targetCountry}的关系`, "diplomacy");
+            alert(`与${targetCountry}的关系改善了！`);
+        }
+        
+        function proposeTradeAgreement(targetCountry) {
+            const cost = 15;
+            if (gameState.resources.politicalPower < cost) {
+                alert("政治点数不足！");
+                return;
+            }
+            
+            gameState.resources.politicalPower -= cost;
+            gameState.countries[gameState.playerCountry].relations[targetCountry] += 15;
+            gameState.resources.industry += 5; // 贸易协定带来工业增长
+            
+            updateResourceDisplay();
+            updateCountryRelations();
+            
+            addGameLog(`你与${targetCountry}签订了贸易协定`, "diplomacy");
+            alert(`与${targetCountry}签订了贸易协定！工业+5`);
+        }
+        
+        function proposeNonAggressionPact(targetCountry) {
+            const relationValue = gameState.countries[gameState.playerCountry].relations[targetCountry];
+            if (relationValue < 30) {
+                alert(`${targetCountry}不愿意签订互不侵犯条约！`);
+                return;
+            }
+            
+            const cost = 25;
+            if (gameState.resources.politicalPower < cost) {
+                alert("政治点数不足！");
+                return;
+            }
+            
+            gameState.resources.politicalPower -= cost;
+            gameState.countries[gameState.playerCountry].relations[targetCountry] += 20;
+            
+            updateResourceDisplay();
+            updateCountryRelations();
+            
+            addGameLog(`你与${targetCountry}签订了互不侵犯条约`, "diplomacy");
+            alert(`与${targetCountry}签订了互不侵犯条约！`);
+        }
+        
+        function requestMilitaryAccess(targetCountry) {
+            const relationValue = gameState.countries[gameState.playerCountry].relations[targetCountry];
+            if (relationValue < 40) {
+                alert(`${targetCountry}不愿意给予军事通行权！`);
+                return;
+            }
+            
+            const cost = 20;
+            if (gameState.resources.politicalPower < cost) {
+                alert("政治点数不足！");
+                return;
+            }
+            
+            gameState.resources.politicalPower -= cost;
+            gameState.countries[gameState.playerCountry].relations[targetCountry] += 5;
+            
+            updateResourceDisplay();
+            updateCountryRelations();
+            
+            addGameLog(`你获得了在${targetCountry}的军事通行权`, "diplomacy");
+            alert(`获得了在${targetCountry}的军事通行权！`);
+        }
+        
+        function proposeAlliance(targetCountry) {
+            const relationValue = gameState.countries[gameState.playerCountry].relations[targetCountry];
+            if (relationValue < 60) {
+                alert(`${targetCountry}不愿意结盟！`);
+                return;
+            }
+            
+            const cost = 50;
+            if (gameState.resources.politicalPower < cost) {
+                alert("政治点数不足！");
+                return;
+            }
+            
+            gameState.resources.politicalPower -= cost;
+            gameState.countries[gameState.playerCountry].relations[targetCountry] = 100; // 设为盟友
+            
+            updateResourceDisplay();
+            updateCountryRelations();
+            
+            addGameLog(`你与${targetCountry}结成了军事同盟`, "diplomacy");
+            alert(`与${targetCountry}结成了军事同盟！`);
+        }
+        
+        function declareWar(targetCountry) {
+            if (confirm(`确定要对${targetCountry}宣战吗？这将导致关系永久恶化！`)) {
+                gameState.countries[gameState.playerCountry].relations[targetCountry] = -100;
+                
+                // 与其他国家的关系也会受到影响
+                for (const country in gameState.countries[gameState.playerCountry].relations) {
+                    if (country !== targetCountry) {
+                        // 如果目标国家与这些国家关系良好，我们的关系会下降
+                        if (gameState.countries[targetCountry].relations[country] > 30) {
+                            gameState.countries[gameState.playerCountry].relations[country] -= 10;
+                        }
+                    }
+                }
+                
+                updateCountryRelations();
+                
+                addGameLog(`你向${targetCountry}宣战！`, "war");
+                alert(`已对${targetCountry}宣战！`);
+            }
+        }
+    </script>
+</body>
+</html>
